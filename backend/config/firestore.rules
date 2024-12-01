@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Funciones de ayuda
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Reglas para Guivers
+    match /guivers/{guiverId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.auth.uid == guiverId;
+      allow update, delete: if isOwner(guiverId);
+    }
+
+    // Reglas para Causas
+    match /causes/{causeId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && 
+        get(/databases/$(database)/documents/causes/$(causeId)).data.guiverId == request.auth.uid;
+      
+      // Reglas para comentarios en causas
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isAuthenticated();
+        allow update, delete: if isAuthenticated() && 
+          get(/databases/$(database)/documents/causes/$(causeId)/comments/$(commentId)).data.guiverId == request.auth.uid;
+      }
+    }
+
+    // Reglas para Productos
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && 
+        get(/databases/$(database)/documents/products/$(productId)).data.guiverId == request.auth.uid;
+    }
+  }
+}
