@@ -5,16 +5,23 @@ import {
   Typography,
   Avatar,
   Grid,
-  Tab,
-  Tabs,
   Card,
   CardContent,
+  Tabs,
+  Tab,
   Chip,
   Button,
   Link,
+  Paper,
 } from '@mui/material';
-import { Email, Phone, Language, LocationOn } from '@mui/icons-material';
+import {
+  Email as EmailIcon,
+  Phone as PhoneIcon,
+  Language as LanguageIcon,
+  LocationOn as LocationIcon,
+} from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -36,197 +43,281 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const ProfilePage = () => {
+  const { currentUser, logout } = useAuth();
   const [tabValue, setTabValue] = useState(0);
-  const { currentUser } = useAuth();
-
-  // Mock data - replace with actual API calls
-  const guiverData = {
-    id: '1',
-    name: 'John Doe',
-    type: 'entrepreneur',
-    bio: 'Passionate about creating sustainable products that make a difference.',
-    avatar: 'https://source.unsplash.com/random/150x150/?portrait',
-    location: 'San Francisco, CA',
-    email: 'john@example.com',
-    phone: '+1 (555) 123-4567',
-    website: 'www.johndoe.com',
-    socialLinks: {
-      linkedin: 'https://linkedin.com/in/johndoe',
-      twitter: 'https://twitter.com/johndoe',
-      instagram: 'https://instagram.com/johndoe',
-    },
-  };
-
-  const causes = [
-    {
-      id: '1',
-      title: 'Save the Amazon Rainforest',
-      type: 'environmental',
-      status: 'active',
-      supporters: 1234,
-    },
-    {
-      id: '2',
-      title: 'Clean Ocean Initiative',
-      type: 'environmental',
-      status: 'active',
-      supporters: 856,
-    },
-  ];
-
-  const products = [
-    {
-      id: '1',
-      title: 'Eco-Friendly Water Bottle',
-      description: 'Made from recycled materials',
-      price: 29.99,
-      causeId: '1',
-      causeName: 'Save the Amazon Rainforest',
-      contactInfo: {
-        whatsapp: '+1234567890',
-        email: 'sales@example.com',
-      },
-    },
-  ];
+  const navigate = useNavigate();
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
+  const handleProductClick = (productId: string) => {
+    navigate(`/products/${productId}`);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/', { replace: true });
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
+  // Mock data - replace with actual API calls
+  const guiverData = {
+    id: '1',
+    name: 'Juan Pérez',
+    type: 'entrepreneur',
+    bio: 'Apasionado por crear productos sostenibles que marquen la diferencia.',
+    avatar: 'https://source.unsplash.com/random/150x150/?portrait',
+    location: 'Ciudad de México',
+    email: 'juan@example.com',
+    phone: '+52 (555) 123-4567',
+    website: 'www.juanperez.com',
+    stats: {
+      causesCreated: 12,
+      causesSupported: 45,
+      impact: '25K',
+    },
+    causes: [
+      {
+        id: '1',
+        title: 'Reforestación Urbana',
+        type: 'ambiental',
+        status: 'activa',
+        supporters: 156,
+        image: 'https://source.unsplash.com/random/400x300/?reforestation',
+      },
+      {
+        id: '2',
+        title: 'Educación para Todos',
+        type: 'social',
+        status: 'completada',
+        supporters: 89,
+        image: 'https://source.unsplash.com/random/400x300/?education',
+      },
+    ],
+    products: [
+      {
+        id: '1',
+        name: 'Bolsas Ecológicas',
+        price: '$299',
+        impact: '5%',
+        image: 'https://source.unsplash.com/random/400x300/?eco-bag',
+      },
+      {
+        id: '2',
+        name: 'Botellas Reutilizables',
+        price: '$199',
+        impact: '3%',
+        image: 'https://source.unsplash.com/random/400x300/?reusable-bottle',
+      },
+    ],
+  };
+
   return (
     <Container maxWidth="lg">
-      {/* Profile Header */}
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Avatar
-          src={guiverData.avatar}
-          sx={{ width: 150, height: 150, mx: 'auto', mb: 2 }}
-        />
-        <Typography variant="h4" gutterBottom>
-          {guiverData.name}
-        </Typography>
-        <Chip
-          label={guiverData.type === 'entrepreneur' ? 'Entrepreneur' : 'Helper'}
-          color="primary"
-          sx={{ mb: 2 }}
-        />
-        <Typography variant="body1" color="text.secondary" paragraph>
-          {guiverData.bio}
-        </Typography>
-        
-        {/* Contact Information */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 3 }}>
-          <Chip icon={<Email />} label={guiverData.email} />
-          <Chip icon={<Phone />} label={guiverData.phone} />
-          <Chip icon={<Language />} label={guiverData.website} />
-          <Chip icon={<LocationOn />} label={guiverData.location} />
-        </Box>
-      </Box>
-
-      {/* Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={tabValue} onChange={handleTabChange} centered>
-          <Tab label="Causes" />
-          <Tab label="Products" />
-          <Tab label="About" />
-        </Tabs>
-      </Box>
-
-      {/* Causes Tab */}
-      <TabPanel value={tabValue} index={0}>
-        <Grid container spacing={3}>
-          {causes.map((cause) => (
-            <Grid item xs={12} md={6} key={cause.id}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    {cause.title}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                    <Chip label={cause.type} color="primary" size="small" />
-                    <Chip label={cause.status} color="success" size="small" />
-                  </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    {cause.supporters} supporters
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </TabPanel>
-
-      {/* Products Tab */}
-      <TabPanel value={tabValue} index={1}>
-        <Grid container spacing={3}>
-          {products.map((product) => (
-            <Grid item xs={12} md={6} key={product.id}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    {product.title}
-                  </Typography>
-                  <Typography variant="body2" paragraph>
-                    {product.description}
-                  </Typography>
-                  <Typography variant="h6" color="primary" gutterBottom>
-                    ${product.price}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Supporting: {product.causeName}
-                  </Typography>
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Contact Information:
+      <Box sx={{ py: 4 }}>
+        {/* Profile Header */}
+        <Card sx={{ mb: 4 }}>
+          <CardContent>
+            <Grid container spacing={3} alignItems="center">
+              <Grid item>
+                <Avatar
+                  src={guiverData.avatar}
+                  sx={{ width: 120, height: 120 }}
+                />
+              </Grid>
+              <Grid item xs>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                  <Typography variant="h4">{guiverData.name}</Typography>
+                  <Chip
+                    label={guiverData.type === 'entrepreneur' ? 'Emprendedor' : 'Guiver'}
+                    color="primary"
+                  />
+                </Box>
+                <Typography variant="body1" color="text.secondary" paragraph>
+                  {guiverData.bio}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 3 }}>
+                  <Box>
+                    <Typography variant="h6">{guiverData.stats.causesCreated}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Causas Creadas
                     </Typography>
-                    <Link href={`https://wa.me/${product.contactInfo.whatsapp}`} target="_blank">
-                      <Button variant="outlined" size="small" sx={{ mr: 1 }}>
-                        WhatsApp
-                      </Button>
-                    </Link>
-                    <Link href={`mailto:${product.contactInfo.email}`}>
-                      <Button variant="outlined" size="small">
-                        Email
-                      </Button>
-                    </Link>
                   </Box>
-                </CardContent>
-              </Card>
+                  <Box>
+                    <Typography variant="h6">{guiverData.stats.causesSupported}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Causas Apoyadas
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="h6">${guiverData.stats.impact}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Impacto Generado
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+              <Grid item>
+                <Button variant="contained" color="primary">
+                  Seguir
+                </Button>
+              </Grid>
             </Grid>
-          ))}
-        </Grid>
-      </TabPanel>
+          </CardContent>
+        </Card>
 
-      {/* About Tab */}
-      <TabPanel value={tabValue} index={2}>
-        <Box sx={{ maxWidth: 600, mx: 'auto' }}>
-          <Typography variant="h6" gutterBottom>
-            Social Media
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
-            {Object.entries(guiverData.socialLinks).map(([platform, url]) => (
-              <Link href={url} target="_blank" key={platform}>
-                <Button variant="outlined">{platform}</Button>
-              </Link>
-            ))}
-          </Box>
-          
-          <Typography variant="h6" gutterBottom>
-            Contact Information
-          </Typography>
-          <Typography variant="body1" paragraph>
-            Email: {guiverData.email}
-          </Typography>
-          <Typography variant="body1" paragraph>
-            Phone: {guiverData.phone}
-          </Typography>
-          <Typography variant="body1" paragraph>
-            Website: {guiverData.website}
-          </Typography>
-          <Typography variant="body1">
-            Location: {guiverData.location}
-          </Typography>
+        {/* Contact Information */}
+        <Card sx={{ mb: 4 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Información de Contacto
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <EmailIcon color="action" />
+                  <Typography>{guiverData.email}</Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <PhoneIcon color="action" />
+                  <Typography>{guiverData.phone}</Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <LanguageIcon color="action" />
+                  <Link href={`https://${guiverData.website}`} target="_blank">
+                    {guiverData.website}
+                  </Link>
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <LocationIcon color="action" />
+                  <Typography>{guiverData.location}</Typography>
+                </Box>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+
+        {/* Tabs */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={tabValue} onChange={handleTabChange}>
+            <Tab label="Causas" />
+            <Tab label="Productos" />
+          </Tabs>
         </Box>
-      </TabPanel>
+
+        {/* Causes Tab */}
+        <TabPanel value={tabValue} index={0}>
+          <Grid container spacing={3}>
+            {guiverData.causes.map((cause) => (
+              <Grid item xs={12} sm={6} key={cause.id}>
+                <Card>
+                  <Box
+                    sx={{
+                      height: 200,
+                      backgroundImage: `url(${cause.image})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                  />
+                  <CardContent>
+                    <Box sx={{ mb: 2 }}>
+                      <Chip
+                        label={cause.type}
+                        color={cause.type === 'ambiental' ? 'success' : 'primary'}
+                        size="small"
+                        sx={{ mr: 1 }}
+                      />
+                      <Chip
+                        label={cause.status}
+                        color={cause.status === 'activa' ? 'warning' : 'default'}
+                        size="small"
+                      />
+                    </Box>
+                    <Typography variant="h6" gutterBottom>
+                      {cause.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {cause.supporters} seguidores
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </TabPanel>
+
+        {/* Products Tab */}
+        <TabPanel value={tabValue} index={1}>
+          <Grid container spacing={3}>
+            {guiverData.products.map((product) => (
+              <Grid item xs={12} sm={6} md={4} key={product.id}>
+                <Card 
+                  sx={{ 
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s ease-in-out',
+                    '&:hover': {
+                      transform: 'scale(1.02)',
+                    },
+                  }}
+                  onClick={() => handleProductClick(product.id)}
+                >
+                  <Box
+                    sx={{
+                      height: 200,
+                      backgroundImage: `url(${product.image})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                  />
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      {product.name}
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Typography variant="h5" color="primary">
+                        {product.price}
+                      </Typography>
+                      <Chip
+                        label={`${product.impact} Impacto`}
+                        color="success"
+                        size="small"
+                      />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </TabPanel>
+
+        {/* Logout Button */}
+        <Box sx={{ mt: 4 }}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleLogout}
+            fullWidth
+          >
+            Cerrar Sesión
+          </Button>
+        </Box>
+      </Box>
     </Container>
   );
 };

@@ -8,15 +8,13 @@ import {
   Button,
   Link,
   Paper,
-  Divider,
   Alert,
 } from '@mui/material';
-import { Google } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { signInWithEmail, signInWithGoogle } = useAuth();
+  const { signInWithEmail } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -27,104 +25,93 @@ const LoginPage = () => {
     try {
       setError('');
       setLoading(true);
-      await signInWithEmail(email, password);
-      navigate('/');
-    } catch (err) {
-      setError('Failed to sign in. Please check your credentials.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    try {
-      setError('');
-      setLoading(true);
-      await signInWithGoogle();
-      navigate('/');
-    } catch (err) {
-      setError('Failed to sign in with Google.');
+      const user = await signInWithEmail(email, password);
+      if (user?.emailVerified) {
+        navigate('/feed');
+      } else {
+        navigate('/verify-email');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión. Por favor verifica tus credenciales.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 8, mb: 4 }}>
-        <Paper elevation={3} sx={{ p: 4 }}>
-          <Typography variant="h4" component="h1" align="center" gutterBottom>
-            Welcome Back
-          </Typography>
-          <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 4 }}>
-            Sign in to continue making a difference
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            padding: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          <Typography component="h1" variant="h5" gutterBottom>
+            Iniciar Sesión
           </Typography>
 
           {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
+            <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
               {error}
             </Alert>
           )}
 
-          <form onSubmit={handleEmailLogin}>
+          <Box component="form" onSubmit={handleEmailLogin} sx={{ mt: 1, width: '100%' }}>
             <TextField
+              margin="normal"
+              required
               fullWidth
-              label="Email"
-              type="email"
+              id="email"
+              label="Correo Electrónico"
+              name="email"
+              autoComplete="email"
+              autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              margin="normal"
-              required
             />
             <TextField
-              fullWidth
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               margin="normal"
               required
+              fullWidth
+              name="password"
+              label="Contraseña"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
-            <Link
-              component={RouterLink}
-              to="/forgot-password"
-              variant="body2"
-              sx={{ display: 'block', mb: 2, textAlign: 'right' }}
-            >
-              Forgot password?
-            </Link>
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              size="large"
+              sx={{ mt: 3, mb: 2 }}
               disabled={loading}
-              sx={{ mb: 2 }}
             >
-              Sign In
+              Iniciar Sesión
             </Button>
-          </form>
 
-          <Divider sx={{ my: 3 }}>or</Divider>
-
-          <Button
-            fullWidth
-            variant="outlined"
-            size="large"
-            startIcon={<Google />}
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            sx={{ mb: 3 }}
-          >
-            Sign in with Google
-          </Button>
-
-          <Typography variant="body2" align="center">
-            Don't have an account?{' '}
-            <Link component={RouterLink} to="/register">
-              Sign up
-            </Link>
-          </Typography>
+            <Box sx={{ mt: 2, textAlign: 'center' }}>
+              <Typography variant="body2">
+                ¿No tienes una cuenta?{' '}
+                <Link component={RouterLink} to="/register">
+                  Regístrate aquí
+                </Link>
+              </Typography>
+            </Box>
+          </Box>
         </Paper>
       </Box>
     </Container>

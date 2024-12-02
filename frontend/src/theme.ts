@@ -2,6 +2,7 @@ import { createTheme } from '@mui/material/styles';
 
 export const theme = createTheme({
   palette: {
+    mode: 'light',
     primary: {
       main: '#2E7D32',
       light: '#4CAF50',
@@ -16,6 +17,10 @@ export const theme = createTheme({
       default: '#F5F5F5',
       paper: '#FFFFFF',
     },
+    text: {
+      primary: '#000000',
+      secondary: '#666666',
+    }
   },
   typography: {
     fontFamily: '"Quicksand", "Helvetica", "Arial", sans-serif',
@@ -60,6 +65,14 @@ export const theme = createTheme({
     },
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundColor: '#F5F5F5',
+          color: '#000000',
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {

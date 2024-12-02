@@ -10,27 +10,24 @@ import {
   Paper,
   Divider,
   Alert,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
   FormControl,
   FormLabel,
 } from '@mui/material';
-import { Google } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { signUpWithEmail, signInWithGoogle } = useAuth();
+  const { signUpWithEmail } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
     name: '',
-    guiverType: 'helper', // helper or entrepreneur
     bio: '',
+    tags: [] as string[],
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,47 +42,96 @@ const RegisterPage = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      return setError('Passwords do not match');
+      return setError('Las contraseñas no coinciden');
+    }
+
+    if (formData.password.length < 6) {
+      return setError('La contraseña debe tener al menos 6 caracteres');
     }
 
     try {
       setError('');
       setLoading(true);
+      
       await signUpWithEmail(formData.email, formData.password, {
         name: formData.name,
-        guiverType: formData.guiverType,
         bio: formData.bio,
+        tags: formData.tags,
       });
-      navigate('/');
-    } catch (err) {
-      setError('Failed to create an account.');
+      
+      setSuccess(true);
+    } catch (err: any) {
+      console.error('Registration error:', err);
+      setError(err.message || 'Error al crear la cuenta. Por favor intenta de nuevo.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleRegister = async () => {
-    try {
-      setError('');
-      setLoading(true);
-      await signInWithGoogle();
-      navigate('/');
-    } catch (err) {
-      setError('Failed to sign up with Google.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (success) {
+    return (
+      <Container component="main" maxWidth="sm">
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Paper
+            elevation={3}
+            sx={{
+              padding: 4,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
+            <Typography component="h1" variant="h5" gutterBottom>
+              ¡Registro Exitoso!
+            </Typography>
+            <Alert severity="success" sx={{ width: '100%', mb: 3 }}>
+              Te hemos enviado un correo de verificación. Por favor revisa tu bandeja de entrada y sigue las instrucciones.
+            </Alert>
+            <Typography variant="body1" align="center" sx={{ mb: 3 }}>
+              Una vez que verifiques tu correo, podrás iniciar sesión y recibirás 100 puntos de bienvenida.
+            </Typography>
+            <Button
+              component={RouterLink}
+              to="/login"
+              variant="contained"
+              fullWidth
+            >
+              Ir a Iniciar Sesión
+            </Button>
+          </Paper>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 8, mb: 4 }}>
-        <Paper elevation={3} sx={{ p: 4 }}>
-          <Typography variant="h4" component="h1" align="center" gutterBottom>
-            Join Guiver
-          </Typography>
-          <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 4 }}>
-            Create an account to start making a difference
+    <Container component="main" maxWidth="sm">
+      <Box
+        sx={{
+          marginTop: 8,
+          marginBottom: 4,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            padding: 4,
+            width: '100%',
+          }}
+        >
+          <Typography component="h1" variant="h5" align="center" gutterBottom>
+            Crear una Cuenta
           </Typography>
 
           {error && (
@@ -94,111 +140,80 @@ const RegisterPage = () => {
             </Alert>
           )}
 
-          <form onSubmit={handleEmailRegister}>
+          <Box component="form" onSubmit={handleEmailRegister} sx={{ mt: 3 }}>
             <TextField
+              margin="normal"
+              required
               fullWidth
-              label="Full Name"
+              label="Nombre Completo"
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              margin="normal"
-              required
+              autoFocus
             />
             <TextField
+              margin="normal"
+              required
               fullWidth
-              label="Email"
-              type="email"
+              label="Correo Electrónico"
               name="email"
+              type="email"
               value={formData.email}
               onChange={handleInputChange}
-              margin="normal"
-              required
             />
             <TextField
+              margin="normal"
+              required
               fullWidth
-              label="Password"
-              type="password"
+              label="Contraseña"
               name="password"
+              type="password"
               value={formData.password}
               onChange={handleInputChange}
-              margin="normal"
-              required
             />
             <TextField
+              margin="normal"
+              required
               fullWidth
-              label="Confirm Password"
-              type="password"
+              label="Confirmar Contraseña"
               name="confirmPassword"
+              type="password"
               value={formData.confirmPassword}
               onChange={handleInputChange}
-              margin="normal"
-              required
             />
 
-            <FormControl component="fieldset" sx={{ mt: 2, mb: 2 }}>
-              <FormLabel component="legend">I want to:</FormLabel>
-              <RadioGroup
-                name="guiverType"
-                value={formData.guiverType}
-                onChange={handleInputChange}
-              >
-                <FormControlLabel
-                  value="helper"
-                  control={<Radio />}
-                  label="Support causes and buy products (Helper)"
-                />
-                <FormControlLabel
-                  value="entrepreneur"
-                  control={<Radio />}
-                  label="Create causes and sell products (Entrepreneur)"
-                />
-              </RadioGroup>
-            </FormControl>
-
             <TextField
-              fullWidth
-              label="Bio"
-              name="bio"
-              value={formData.bio}
-              onChange={handleInputChange}
               margin="normal"
+              fullWidth
+              label="Biografía"
+              name="bio"
               multiline
               rows={3}
-              placeholder="Tell us a bit about yourself..."
+              value={formData.bio}
+              onChange={handleInputChange}
+              placeholder="Cuéntanos un poco sobre ti y tus intereses en ayudar..."
+              helperText="Completa tu perfil y verifica tu email para ganar 100 puntos"
             />
 
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              size="large"
+              sx={{ mt: 3, mb: 2 }}
               disabled={loading}
-              sx={{ mt: 2, mb: 2 }}
             >
-              Sign Up
+              Registrarse
             </Button>
-          </form>
 
-          <Divider sx={{ my: 3 }}>or</Divider>
-
-          <Button
-            fullWidth
-            variant="outlined"
-            size="large"
-            startIcon={<Google />}
-            onClick={handleGoogleRegister}
-            disabled={loading}
-            sx={{ mb: 3 }}
-          >
-            Sign up with Google
-          </Button>
-
-          <Typography variant="body2" align="center">
-            Already have an account?{' '}
-            <Link component={RouterLink} to="/login">
-              Sign in
-            </Link>
-          </Typography>
+            <Box sx={{ mt: 2, textAlign: 'center' }}>
+              <Typography variant="body2">
+                ¿Ya tienes una cuenta?{' '}
+                <Link component={RouterLink} to="/login">
+                  Inicia sesión aquí
+                </Link>
+              </Typography>
+            </Box>
+          </Box>
         </Paper>
       </Box>
     </Container>

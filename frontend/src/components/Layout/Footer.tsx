@@ -23,7 +23,7 @@ const Footer = () => {
           <Link color="inherit" href="/">
             Guiver
           </Link>
-          {' - Making the world better, one cause at a time.'}
+          {' - Haciendo del mundo un lugar mejor, una causa a la vez.'}
         </Typography>
       </Container>
     </Box>
